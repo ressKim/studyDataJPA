@@ -223,7 +223,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    public void bulkUpdate(){
+    public void bulkUpdate() {
         //영속성 컨텍스트 관리 없이 바로 db에 bulk 때리는거라서 조심해야 한다.
         //given
         memberRepository.save((new Member("member1", 10)));
@@ -236,7 +236,7 @@ class MemberRepositoryTest {
         int resultCount = memberRepository.bulkAgePlus(20);
 //        entityManager.flush();  //데이터 바로 넣기 - 넣긴 하는데 혹시모르니..
 //        entityManager.clear();  //영속성 컨텍스트 초기화 시키기
-        
+
         //이런 방식이 영속성 관리가 안되는 mybatis 같은걸 섞어쓸 때도 flush 후 clear 하고 쓰는것도 필요하다
 
 
@@ -251,7 +251,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    public void findMemberLazy(){
+    public void findMemberLazy() {
         //given
         //member1 -> teamA
         //member2 -> teamB
@@ -278,11 +278,23 @@ class MemberRepositoryTest {
             System.out.println("member = " + member.getUsername());
             System.out.println("member.team = " + member.getTeam().getName());
         }
-
-
     }
 
+    @Test
+    public void queryHint(){
+        //given
+        Member member1 = new Member("member1", 10);
+        memberRepository.save(member1);
+        entityManager.flush();
+        entityManager.clear();
 
+        //when
+//        Member findMember = memberRepository.findById(member1.getId()).get();
+        Member findMember = memberRepository.findReadOnlyByUsername("member1");
+        findMember.setUsername("member2");//readOnly 가 되면 변경감지도 안해서 바뀌지 않는다.
+
+        entityManager.flush();
+    }
 
 
 }

@@ -3,15 +3,13 @@ package study.datajpa.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 
 import javax.persistence.Entity;
+import javax.persistence.QueryHint;
 import java.util.List;
 import java.util.Optional;
 
@@ -72,4 +70,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 //    @EntityGraph("Member.all") //Member 의 NamedEntityGraph 이용
     List<Member> findEntityGraphByUsername(@Param("username") String username);
 
+    //readOnly 가 되면 변경감지도 안해서 바뀌지 않는다. - 최적화가 되긴 하는데 진짜 몇퍼센트 안된다는걸 알고있자. - 진짜 진짜 많은 api 등에만 넣는게 좋다
+    //보통 성능 느리면 그전에 캐시등 써야된다.
+    @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
+    Member findReadOnlyByUsername(String username);
 }
