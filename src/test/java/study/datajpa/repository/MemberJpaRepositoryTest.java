@@ -18,7 +18,8 @@ import static org.junit.jupiter.api.Assertions.*;
 //@Rollback(false)
 class MemberJpaRepositoryTest {
 
-    @Autowired MemberJpaRepository memberJpaRepository;
+    @Autowired
+    MemberJpaRepository memberJpaRepository;
 
     @Test
     public void testMember() {
@@ -34,7 +35,7 @@ class MemberJpaRepositoryTest {
 
 
     @Test
-    public void basicCRUD(){
+    public void basicCRUD() {
         Member member1 = new Member("member1");
         Member member2 = new Member("member2");
         memberJpaRepository.save(member1);
@@ -66,7 +67,7 @@ class MemberJpaRepositoryTest {
     }
 
     @Test
-    public void findByUsernameAndAgeGreaterThen(){
+    public void findByUsernameAndAgeGreaterThen() {
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("AAA", 20);
 
@@ -81,7 +82,7 @@ class MemberJpaRepositoryTest {
     }
 
     @Test
-    public void testNamedQuery(){
+    public void testNamedQuery() {
 
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("BBB", 20);
@@ -92,6 +93,35 @@ class MemberJpaRepositoryTest {
         List<Member> result = memberJpaRepository.findByUsername("AAA");
         Member findMember = result.get(0);
         assertThat(findMember).isEqualTo(m1);
+    }
+
+    @Test
+    public void paging() {
+        memberJpaRepository.save(new Member("member1", 10));
+        memberJpaRepository.save(new Member("member2", 10));
+        memberJpaRepository.save(new Member("member3", 10));
+        memberJpaRepository.save(new Member("member4", 10));
+        memberJpaRepository.save(new Member("member5", 10));
+
+
+        int age = 10;
+        int offset = 1;
+        int limit = 3;
+
+        //when
+        List<Member> members = memberJpaRepository.findByPage(age, offset, limit);
+        Long totalCount = memberJpaRepository.totalCount(age);
+
+        //페이지 계산 공식 적용..
+        // totalPage = totalCount /size ...
+        // 마지막 페이지 ...
+        // 최초 페이지 ...
+
+        //then
+        assertThat(members.size()).isEqualTo(3);
+        assertThat(totalCount).isEqualTo(5);
+
+
     }
 
 }

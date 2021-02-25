@@ -1,5 +1,8 @@
 package study.datajpa.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -38,6 +41,12 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findOptionalByUsername(String userName);//옵션단건
 
+    //쿼리가 복잡해 질수록 count 하는데 많이 걸리기 때문에 따로 해주는게 성능 최적화 면에서 좋다.
+    //핵심 비즈니스 로직만 짜면 나머지는 알아서 해주는 느낌이 있기때문에 좋다.
+    @Query(value = "select m from Member m left join m.team t",
+            countQuery = "select count(m.username) from Member m")
+    Page<Member> findByAge(int age, Pageable pageable);
 
+    Slice<Member> findSliceByAge(int age, Pageable pageable);
 
 }
