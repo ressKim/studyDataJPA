@@ -12,6 +12,8 @@ import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 import study.datajpa.entity.Team;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +28,10 @@ class MemberRepositoryTest {
     MemberRepository memberRepository;
     @Autowired
     TeamRepository teamRepository;
+
+    @PersistenceContext
+    EntityManager entityManager;
+
 
     @Test
     public void testMember() {
@@ -215,4 +221,36 @@ class MemberRepositoryTest {
 //        assertThat(slice.hasNext()).isTrue();
 
     }
+
+    @Test
+    public void bulkUpdate(){
+        //영속성 컨텍스트 관리 없이 바로 db에 bulk 때리는거라서 조심해야 한다.
+        //given
+        memberRepository.save((new Member("member1", 10)));
+        memberRepository.save((new Member("member2", 19)));
+        memberRepository.save((new Member("member3", 20)));
+        memberRepository.save((new Member("member4", 22)));
+        memberRepository.save((new Member("member5", 40)));
+
+        //when
+        int resultCount = memberRepository.bulkAgePlus(20);
+//        entityManager.flush();  //데이터 바로 넣기 - 넣긴 하는데 혹시모르니..
+//        entityManager.clear();  //영속성 컨텍스트 초기화 시키기
+        
+        //이런 방식이 영속성 관리가 안되는 mybatis 같은걸 섞어쓸 때도 flush 후 clear 하고 쓰는것도 필요하다
+
+
+        List<Member> result = memberRepository.findByUsername("member5");//영속성 컨텍스트가 다시 생성된다.
+        Member member5 = result.get(0);
+        System.out.println("member5 = " + member5);//41이 아닌 40이다. - 영속성 컨텍스트 무시하고 bulk 때린거라서
+        //그래서 벌크 연산 이후에는 영속성 컨텍스트를 날려야 된다.
+
+
+        //then
+        assertThat(resultCount).isEqualTo(3);
+    }
+
+
+
+
 }
