@@ -9,6 +9,7 @@ import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 
 import javax.persistence.Entity;
+import javax.persistence.LockModeType;
 import javax.persistence.QueryHint;
 import java.util.List;
 import java.util.Optional;
@@ -74,4 +75,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     //보통 성능 느리면 그전에 캐시등 써야된다.
     @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
     Member findReadOnlyByUsername(String username);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<Member> findLockByUsername(String username);
+
+
+
 }

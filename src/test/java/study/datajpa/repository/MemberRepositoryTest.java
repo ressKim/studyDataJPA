@@ -296,5 +296,18 @@ class MemberRepositoryTest {
         entityManager.flush();
     }
 
+    @Test
+    public void lock(){
+        //given
+        Member member1 = new Member("member1", 10);
+        memberRepository.save(member1);
+        entityManager.flush();
+        entityManager.clear();
+
+        //when
+        List<Member> result = memberRepository.findLockByUsername("member1");
+
+    }
+
 
 }
