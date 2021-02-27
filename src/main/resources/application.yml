@@ -11,6 +11,17 @@ spring:
       hibernate:
 #        show_sql: true
         format_sql: true
+
+# page 갯수 전체 설정 방법
+  data:
+    web:
+      pageable:
+        default-page-size: 10
+        max-page-size: 2000
+        #page 1부터 시작하는 방법인데, 내부적으로 pagenum 갯수하고 는 0 부터 시작해서 왠만하면 0부터 쓰자
+        #영 1부터 필요하면 따로 page를 구현하자
+        one-indexed-parameters: true
+
 logging.level:
   org.hibernate.SQL: debug
 #  org.hibernate.type: trace
