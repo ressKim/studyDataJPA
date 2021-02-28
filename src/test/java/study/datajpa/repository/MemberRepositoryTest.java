@@ -369,7 +369,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    public void projection(){
+    public void projection() {
         //projection 관련 - 간단하게 원하는 데이터만 찍어올 때 편하게 쓸 수 있는 거다.
         //join 들어가면 조금 쓰기 애매해 지긴 한다. - 프로젝션 대상이 root 엔티티를 넘어가면 jpql select 최적화가 안된다고한다.
         //단순할때 사용하기 좋음 - 복잡해지면 QueryDSL 이다.
@@ -391,20 +391,43 @@ class MemberRepositoryTest {
 //            System.out.println("usernameOnly = " + usernameOnly);
 //        }
 //        List<UsernameOnlyDto> result = memberRepository. findProjectionsByUsername("m1", UsernameOnlyDto.class);
-        List<NestedClosedProjections> result = memberRepository. findProjectionsByUsername("m1", NestedClosedProjections.class);
+        List<NestedClosedProjections> result = memberRepository.findProjectionsByUsername("m1", NestedClosedProjections.class);
 
         for (NestedClosedProjections nestedClosedProjections : result) {
-            String  username = nestedClosedProjections.getUsername();
+            String username = nestedClosedProjections.getUsername();
             System.out.println("username = " + username);
             String teamName = nestedClosedProjections.getTeam().getName();
             System.out.println("teamName = " + teamName);
-
-
-
         }
-
-
     }
+
+    @Test
+    public void nativeQuery(){
+        //동적쿼리는 하이버네이트를 직접 활용하는데
+        //스프링 jdbcTemplate, myBatis, jooq 같은 외부 라이브러리를 추천한다.
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        //when
+//        Member result = memberRepository.findByNativeQuery("m1");
+        Page<MemberProjection> result = memberRepository.findByNativeProjection(PageRequest.of(0, 10));
+        List<MemberProjection> content = result.getContent();
+        for (MemberProjection memberProjection : content) {
+            System.out.println("memberProjection.getUsername() = " + memberProjection.getUsername());
+            System.out.println("memberProjection.getTeamName() = " + memberProjection.getTeamName());
+        }
+    }
+
+
 
 
 }
