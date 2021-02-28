@@ -83,5 +83,9 @@ public interface MemberRepository extends
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<Member> findLockByUsername(String username);
 
+    //Projection 관련 - 이렇게 하면 구현체가 담겨서 나간다
+//    List<UsernameOnly> findProjectionsByUsername(@Param("username") String username);
+    <T> List<T> findProjectionsByUsername(@Param("username") String username, Class<T> type);
+
 
 }

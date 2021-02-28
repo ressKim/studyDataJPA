@@ -317,7 +317,7 @@ class MemberRepositoryTest {
 
     @Test//가볍게 보자 - Specification 관련
     public void specBasic() {
-
+        //criteria - 관련 >> 동적 쿼리를 위한 것이긴 하나 너무 복잡해서 실용성이 많이 떨어진다.
         //given
         Team teamA = new Team("teamA");
         em.persist(teamA);
@@ -340,6 +340,8 @@ class MemberRepositoryTest {
 
     @Test
     public void queryByExample() {
+        //queryByExample
+        //이것도 동적 쿼리를 위한 것이긴 하나 - left join 은 안되고 단순한것만 되서 별 도움 안된다.
         Team teamA = new Team("teamA");
         em.persist(teamA);
         Member m1 = new Member("m1", 0, teamA);
@@ -364,6 +366,43 @@ class MemberRepositoryTest {
         List<Member> result = memberRepository.findAll(example);
 
         assertThat(result.get(0).getUsername()).isEqualTo("m1");
+    }
+
+    @Test
+    public void projection(){
+        //projection 관련 - 간단하게 원하는 데이터만 찍어올 때 편하게 쓸 수 있는 거다.
+        //join 들어가면 조금 쓰기 애매해 지긴 한다. - 프로젝션 대상이 root 엔티티를 넘어가면 jpql select 최적화가 안된다고한다.
+        //단순할때 사용하기 좋음 - 복잡해지면 QueryDSL 이다.
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        //when
+//        List<UsernameOnly> result = memberRepository.findProjectionsByUsername("m1");
+//        for (UsernameOnly usernameOnly : result) {
+//            System.out.println("usernameOnly = " + usernameOnly);
+//        }
+//        List<UsernameOnlyDto> result = memberRepository. findProjectionsByUsername("m1", UsernameOnlyDto.class);
+        List<NestedClosedProjections> result = memberRepository. findProjectionsByUsername("m1", NestedClosedProjections.class);
+
+        for (NestedClosedProjections nestedClosedProjections : result) {
+            String  username = nestedClosedProjections.getUsername();
+            System.out.println("username = " + username);
+            String teamName = nestedClosedProjections.getTeam().getName();
+            System.out.println("teamName = " + teamName);
+
+
+
+        }
+
 
     }
 
