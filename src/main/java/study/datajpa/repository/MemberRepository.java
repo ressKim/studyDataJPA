@@ -14,16 +14,20 @@ import javax.persistence.QueryHint;
 import java.util.List;
 import java.util.Optional;
 
-public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
+public interface MemberRepository extends
+        JpaRepository<Member, Long>
+        , MemberRepositoryCustom
+        , JpaSpecificationExecutor<Member> {//JpaSpecificationExecutor<Member> - criteria 관련 - 쓰지 말자구한다..
 
     List<Member> findByUsernameAndAgeGreaterThan(String userName, int age);//길어지면 너무 길어진다
 
     List<Member> findTop3HelloBy();
 
-//    @Query(name = "Member.findByUsername")
+    //    @Query(name = "Member.findByUsername")
     List<Member> findByUsername(@Param("username") String username);
 
-    @Query("select m from Member m where m.username = :username and m.age = :age")//복잡한걸 쿼리로 바로 표현할 수 있다.
+    @Query("select m from Member m where m.username = :username and m.age = :age")
+//복잡한걸 쿼리로 바로 표현할 수 있다.
     List<Member> findUser(@Param("username") String username, @Param("age") int age);
 
     @Query("select m.username from Member m")
@@ -78,8 +82,6 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<Member> findLockByUsername(String username);
-
-
 
 
 }

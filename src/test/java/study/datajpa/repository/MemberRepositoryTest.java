@@ -1,12 +1,14 @@
 package study.datajpa.repository;
 
+import org.assertj.core.api.Assert;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
@@ -30,7 +32,7 @@ class MemberRepositoryTest {
     TeamRepository teamRepository;
 
     @PersistenceContext
-    EntityManager entityManager;
+    EntityManager em;
 
 
     @Test
@@ -266,8 +268,8 @@ class MemberRepositoryTest {
         memberRepository.save(member1);
         memberRepository.save(member2);
 
-        entityManager.flush();
-        entityManager.clear();
+        em.flush();
+        em.clear();
 
         //when
 //        List<Member> members = memberRepository.findAll();
@@ -281,28 +283,28 @@ class MemberRepositoryTest {
     }
 
     @Test
-    public void queryHint(){
+    public void queryHint() {
         //given
         Member member1 = new Member("member1", 10);
         memberRepository.save(member1);
-        entityManager.flush();
-        entityManager.clear();
+        em.flush();
+        em.clear();
 
         //when
 //        Member findMember = memberRepository.findById(member1.getId()).get();
         Member findMember = memberRepository.findReadOnlyByUsername("member1");
         findMember.setUsername("member2");//readOnly 가 되면 변경감지도 안해서 바뀌지 않는다.
 
-        entityManager.flush();
+        em.flush();
     }
 
     @Test
-    public void lock(){
+    public void lock() {
         //given
         Member member1 = new Member("member1", 10);
         memberRepository.save(member1);
-        entityManager.flush();
-        entityManager.clear();
+        em.flush();
+        em.clear();
 
         //when
         List<Member> result = memberRepository.findLockByUsername("member1");
@@ -310,8 +312,32 @@ class MemberRepositoryTest {
     }
 
     @Test
-    public void callCustom(){
+    public void callCustom() {
         List<Member> memberCustom = memberRepository.findMemberCustom();
     }
+
+
+    @Test//가볍게 보자 - Specification 관련
+    public void specBasic() {
+
+        //given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        em.persist(m1);
+        em.persist(m2);
+        em.flush();
+        em.clear();
+        //when
+        Specification<Member> spec =
+                MemberSpec.username("m1").and(MemberSpec.teamName("teamA"));
+        List<Member> result = memberRepository.findAll(spec);
+        //then
+
+        Assertions.assertThat(result.size()).isEqualTo(1);
+
+    }
+
 
 }
