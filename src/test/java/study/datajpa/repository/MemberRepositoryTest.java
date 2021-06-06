@@ -402,7 +402,7 @@ class MemberRepositoryTest {
     @Test
     public void nativeQuery(){
         //동적쿼리는 하이버네이트를 직접 활용하는데
-        //스프링 jdbcTemplate, myBatis, jooq 같은 외부 라이브러리를 추천한다.
+        //스프링 jdbcTemplate, myBatis, jooq, queryDsl 같은 외부 라이브러리를 추천한다.
         Team teamA = new Team("teamA");
         em.persist(teamA);
 
